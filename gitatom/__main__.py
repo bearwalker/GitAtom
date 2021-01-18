@@ -154,6 +154,18 @@ def include(filename):
     publish(html_file)
 
 
+def git_add(filename):
+    pass
+
+
+def git_commit(filename):
+    pass
+
+
+def git_push(filename):
+    pass
+
+
 def usage():
     exit("Usage: python3 -m gitatom [command] (filename)")
 
