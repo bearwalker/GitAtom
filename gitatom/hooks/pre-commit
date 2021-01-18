@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# pre-commit hook is currently a stub.
+# If change of flow is desired re-name file from pre-commit.stub to pre-commit
+# 
