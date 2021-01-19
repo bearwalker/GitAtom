@@ -83,7 +83,7 @@ def atomify(md):
     filename = path.splitext(path.basename(md))[0] # TODO make os-agnostic 
     entry_title = getTitle(filename)
     outname = getFilename(entry_title) + '.xml'
-    print('outname from atomify: ', outname)
+    #print('outname from atomify: ', outname)
 
     # Check for a matching xml file 
     exists = glob.glob('./*' + outname[8:] + '*') # should only ever return 0-1 matches
@@ -136,13 +136,13 @@ def atomify(md):
     outfile.write(atom)
     outfile.close()
 
-    #subprocess.call(['git', 'add', 'files/xml_files/' + outname])
-    #subprocess.call(['git','commit','-m','adding xml to vc'])
+    subprocess.call(['git', 'add', 'files/xml_files/' + outname])
+    subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
     return outname
 
 
 def render(filename):
-    print(f"calling render on {filename}")
+    #print(f"calling render on {filename}")
 
     def md_to_html(md_text, filename):
         pass
@@ -159,8 +159,8 @@ def render(filename):
     outfile = open('files/html_files/' + outname, 'w')
     outfile.write(rendered)
     outfile.close()
-    #subprocess.call(['git', 'add', 'files/html_files/' + outname])
-    #subprocess.call(['git','commit','-m','adding ' + outname + ' to vc'])
+    subprocess.call(['git', 'add', 'files/html_files/' + outname])
+    subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
     #print('Testing render: outfile name is ', outfile.name)
     return outname
 
@@ -213,7 +213,7 @@ def include(filename):
 
 
 def gitatom_git_add(md_file,xml_file,html_file):
-    print('git_add called with : {}, {}, {} files.'.format(md_file, xml_file, html_file))
+    #print('git_add called with : {}, {}, {} files.'.format(md_file, xml_file, html_file))
     subprocess.call(['git', 'add', md_file])
     subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
     subprocess.call(['git', 'add', 'files/html_files/' + html_file])
@@ -221,7 +221,8 @@ def gitatom_git_add(md_file,xml_file,html_file):
 
 
 def gitatom_git_push(filename):
-    print('Push called with file: ', filename)
+    print('New files add to vc, push when ready.')
+    #print('Push called with file: {}'.format(filename))
     #subprocess.call(['git', 'push', 'origin', 'git_hook'])
 
 
@@ -236,7 +237,7 @@ if __name__ == '__main__':
         if command == 'build': build.build_it('./site')
         elif len(sys.argv) > 2:
             filename = sys.argv[2]
-            print("printing filename from main: ", filename)
+            #print("printing filename from main: ", filename)
             if command == 'atomify': 
                 subprocess.call(['git', 'add', filename])
                 file_out = atomify(filename)
