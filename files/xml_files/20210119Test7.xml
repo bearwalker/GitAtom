@@ -1,0 +1,13 @@
+<feed>
+<title>Git Atom</title>
+<updated>2021-01-19 14:10:26.680890</updated>
+<id>https://git.atom/</id>
+<entry>
+<title>Test7</title>
+<id>https://git.atom/20210119Test7</id>
+<published>2021-01-19 14:10:26.680890</published>
+<updated>2021-01-19 14:10:26.680890</updated>
+<content>This file is for testing git flow only.
+</content>
+</entry>
+</feed>
