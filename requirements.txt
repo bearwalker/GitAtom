@@ -1,5 +1,5 @@
 GitPython
 jinja2
 cmarkgfm
-bs4
+BeautifulSoup4
 pyyaml
