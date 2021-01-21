@@ -8,7 +8,7 @@ import glob
 import sys
 import re
 import string
-from os import path
+from os import path as op
 from datetime import datetime 
 from pathlib import Path
 from xml.etree import cElementTree as ET
@@ -74,17 +74,19 @@ def atomify(md):
     if not md.endswith('.md'): exit("Incorrect input file type (expected .md)")
 
     # Get title and xml filename	
-    filename = path.splitext(path.basename(md))[0] # TODO make os-agnostic 
+    filename = op.splitext(op.basename(md))[0] # TODO make os-agnostic 
     entry_title = getTitle(filename)
     outname = getFilename(entry_title) + '.xml'
     #print('outname from atomify: ', outname)
 
     # Check for a matching xml file 
+    #TODO directory pathing should be defined in config and pulled before reference
     exists = glob.glob('./files/xml_files/*' + outname[8:] + '*') # should only ever return 0-1 matches
     if exists: outname = exists[0][2:] # overwrite existing file 
 
     # Grab tags from config
-    config_f = open('./gitatom/gitatom.config')
+    #TODO directory pathing should be defined in config and pulled before reference
+    config_f = open('./config.yaml')
     config = config_f.readlines()
     config_f.close()
 
@@ -93,7 +95,7 @@ def atomify(md):
     feed_title = config[1].strip()
     entry_id = feed_id + outname[:-4] 
     if exists: # retain existing publish date
-        tree = ET.parse(outname) 
+        tree = ET.parse(outname)
         root = tree.getroot()
         entry_published = root.find('entry').find('published').text
         entry_updated = datetime.now()
@@ -118,7 +120,7 @@ def atomify(md):
 
     # https://stackoverflow.com/questions/3411771/best-way-to-replace-multiple-characters-in-a-string
     with open (md,'r') as f: 
-        #embedded html brackets replaced with *** on either side, can be replaced later using opposite operation
+        #embedded html brackets replaced with \** and **/ on either side, can be replaced later using opposite operation
         atom += f.read().replace('<', '\**').replace('>', '**/')
 
     atom += '</content>\n'
@@ -126,19 +128,24 @@ def atomify(md):
     atom += '</feed>\n'
 
     # Write result to file
-    #outname += '.xml' 
-    outfile = open('files/xml_files/' + outname, 'w')
+    #TODO this needs to be fixed to work for updating and new posts, rn needs path+outname for new posts but only outname for updating
+    #breaks on whichever one you dont define
+    path = 'files/xml_files/'
+    outfile = open(path+outname, 'w')
     outfile.write(atom)
     outfile.close()
 
-    subprocess.call(['git', 'add', 'files/xml_files/' + outname])
-    subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
+    print("Atom being saved at "+ outname)
+
+    #subprocess.call(['git', 'add', 'files/xml_files/' + outname])
+    #subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
     return outname
 
   
   
 def render(filename):
 
+    path = 'files/xml_files/'
     #get data from xml
     tree = ET.parse(filename)
     root = tree.getroot()
@@ -156,16 +163,16 @@ def render(filename):
     """
 
     # load template html file
+    #TODO directory pathing should be defined in config and pulled before reference
     template_env = Environment(
-        loader=FileSystemLoader(searchpath='./templates/post_templates/'))
+        loader=FileSystemLoader(searchpath='./gitatom/templates/post_templates/'))
     template = template_env.get_template('default_jinja.html')
 
     # convert content which should be in md to html
     html_text = cmarkgfm.markdown_to_html(content)
     html_name = title + '.html'
-
-
-    with open('files/html_files/' + html_name, "w") as outfile:
+    path = 'files/html_files/'
+    with open(path + html_name, "w") as outfile:
         outfile.write(
             template.render(
                 title=title,
@@ -173,14 +180,13 @@ def render(filename):
                 blog=html_text
             )
         )
-
-    subprocess.call(['git', 'add', 'files/html_files/' + html_name])
-    subprocess.call(['git','commit','-m','adding {} to vc'.format(html_name)])
+    print("Render output being saved at " + path + html_name)
+    #subprocess.call(['git', 'add', 'files/html_files/' + html_name])
+    #subprocess.call(['git','commit','-m','adding {} to vc'.format(html_name)])
     return html_name
 
 
 def publish(filename):
-    print(f"calling publish on {filename}")
     # input: string representation of path to source file.
     # returns: ERROR if the source file does not exist.
     # This function copies the source file to TARGET_DIRECTORY.
@@ -192,8 +198,9 @@ def publish(filename):
     TARGET_DIRECTORY = config.options['publish_directory']
 
     ERROR = -1
-
-    src_path = Path(filename)
+    #TODO directory pathing should be defined in config and pulled before reference
+    path = 'files/html_files/'
+    src_path = Path(path+filename)
     if not src_path.exists():
         return ERROR
 
@@ -232,11 +239,16 @@ def gitatom_git_push(filename):
     #subprocess.call(['git', 'push', 'origin', 'git_hook'])
 
 def run(filename):
+    print("Running atomify on " + filename)
     xml_file = atomify(filename)
+    print("Running render on " + xml_file)
     html_file = render(xml_file)
+    print("Running publish on " + html_file)
     published_file = publish(html_file)
+    print("Appending " + published_file )
     build.append(published_file)
-    gitatom_git_add(filename,xml_file,html_file)
+    print("Done")
+    #gitatom_git_add(filename,xml_file,html_file)
 
 
 def init(target):
@@ -266,13 +278,15 @@ def init(target):
 
     # insert post-commit script into ./git/hooks here ??
 
+def usage():
+    exit("Usage: python3 gitatom [command] (filename)")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         command = sys.argv[1]
-        file_out = ''     
-       
-        elif len(sys.argv) > 2:
+        file_out = ''    
+        if command == 'init': init('./')
+        if len(sys.argv) >= 2:
             filename = sys.argv[2]
             #print("printing filename from main: ", filename)
             if command == 'atomify':
@@ -281,10 +295,10 @@ if __name__ == '__main__':
             elif command == 'render': file_out = render(filename)
             elif command == 'publish': file_out = publish(filename)
             elif command == 'run': 
-                subprocess.call(['git', 'add', filename])
+                print("calling run")
+                #subprocess.call(['git', 'add', filename])
                 file_out = run(filename)
             else: usage()
-            gitatom_git_push(file_out)
-        else: usage()
-
+            #gitatom_git_push(file_out)
     else: usage()
+

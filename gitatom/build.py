@@ -23,11 +23,12 @@ def create(target):
 
 def append(filename):
     print(f"inserting {filename}")
-
+    #TODO directory pathing should be defined in config and pulled before reference
+    path = 'files/html_files/'
     # parse filename (html post) DOM for title and link
-    with open(filename, 'r') as f:
+    with open(path+filename, 'r') as f:
         post = BeautifulSoup(f, 'html.parser')
-    post_title = post.head.title.string
+    post_title = post.find('title').text
     post_link = filename
 
     # get target directory from config file 
