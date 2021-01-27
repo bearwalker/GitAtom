@@ -1,7 +1,4 @@
 TODO
-    - adding a line
-
-
 
     - add yaml library to requirements script
     - remove old config code
