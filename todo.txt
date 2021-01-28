@@ -1,7 +1,6 @@
 TODO
 
     - add yaml library to requirements script
-    - remove old config code
     - remove old config file
     - use config for target publish directory
     - use config for finding the template file in render code
