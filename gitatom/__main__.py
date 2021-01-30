@@ -1,6 +1,6 @@
-import build
+import gitatom.build
 import yaml
-import config
+import gitatom.config
 import shutil
 import cmarkgfm  # used to convert markdown to html in mdtohtml()
 import subprocess

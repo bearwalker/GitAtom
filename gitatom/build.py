@@ -8,7 +8,7 @@
 #
 # output:   publish_directory/index.html
 
-import config
+import gitatom.config
 from pathlib import Path
 import cmarkgfm
 from xml.etree import cElementTree as ET
