@@ -4,6 +4,7 @@ import config
 import shutil
 import cmarkgfm  # used to convert markdown to html in mdtohtml()
 import subprocess
+import pygit2 
 import glob
 import sys
 import re
@@ -13,7 +14,6 @@ from datetime import datetime
 from pathlib import Path
 from xml.etree import cElementTree as ET
 from jinja2 import Environment, FileSystemLoader
-
 
 #Functions not being used in current iteration, together do some modification of title to capitilize and append date to front
 """
@@ -164,11 +164,14 @@ def render(filename):
     return html_name
 
 
-def gitatom_git_add(md_file,xml_file,html_file):
-    subprocess.call(['git', 'add', md_file])
-    subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
-    subprocess.call(['git', 'add', 'files/html_files/' + html_file])
-    subprocess.call(['git', 'commit', '-m', 'Adding {}, {}, {} files to git.'.format(md_file, xml_file, html_file)])
+def gitatom_git_add(repo, extension):
+    index = repo.index
+    index.add(extension)
+    index.write()
+    #subprocess.call(['git', 'add', md_file])
+    #subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
+    #subprocess.call(['git', 'add', 'files/html_files/' + html_file])
+    #subprocess.call(['git', 'commit', '-m', 'Adding {}, {}, {} files to git.'.format(md_file, xml_file, html_file)])
 
 
 def gitatom_git_push(filename):

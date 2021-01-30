@@ -2,6 +2,7 @@
 
 import sys
 import os
+import pygit2
 
 print(sys.path)
 
@@ -9,7 +10,13 @@ sys.path.append(os.getcwd())
 
 print(sys.path)
 
-import gitatom
+from gitatom import __main__ as main
+from gitatom import build
 
 
 print('hello world')
+current_directory = os.getcwd()
+repo_path = pygit2.discover_repository(current_directory)
+repo = pygit2.Repository(repo_path)
+main.gitatom_git_add(repo, '*.test')
+repo.status()
