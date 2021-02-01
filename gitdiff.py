@@ -2,20 +2,26 @@
 from pygit2 import Repository, Index
 from pygit2 import GIT_STATUS_INDEX_NEW, GIT_STATUS_INDEX_MODIFIED
 
+
+# Setting the working directory
 repo = Repository('.')
 
-def git_status_current(repo):
+
+# Returns the staged files in a list
+# -note if you ADD a file then make new changes to it, it won't show up in the
+# list
+
+def git_staged_files(repo):
     index = Index()
     status = repo.status()
-    files = [] 
+    staged_files = [] 
     for filepath, flags in status.items():
-        if flags == GIT_STATUS_INDEX_NEW:
-            files.append(filepath)
-        if flags == GIT_STATUS_INDEX_MODIFIED:
-            files.append(filepath)
-    print(files)
+        if flags == GIT_STATUS_INDEX_NEW or flags == GIT_STATUS_INDEX_MODIFIED:
+            staged_files.append(filepath)
+    return staged_files
 
-git_status_current(repo)
+files = git_staged_files(repo)
+print(files)
 
 
 # diff_workdir and index_workdir both found in the test dir in the pygit2 repo
