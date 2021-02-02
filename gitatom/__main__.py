@@ -14,7 +14,11 @@ from pathlib import Path
 from xml.etree import cElementTree as ET
 from jinja2 import Environment, FileSystemLoader
 
-
+ERROR_OUT= [
+    "filename does not end with .md",
+    "path could not be found",
+    
+]
 #Functions not being used in current iteration, together do some modification of title to capitilize and append date to front
 """
 # Generate blog post title from .md filename
@@ -65,7 +69,10 @@ def camelCaseSplit(str):
 # Takes a .md file and pastes its content into an atom xml format
 def atomify(md):
     # Check for invalid filetype
-    if not md.endswith('.md'): exit("Incorrect input file type (expected .md)")
+    if not md.endswith('.md'):
+        return ERROR_OUT[0]
+    if not path.exists(md): 
+        return ERROR_OUT[1]
 
     # Get title and xml filename	
     entry_title= path.splitext(path.basename(md))[0] # TODO make os-agnostic 
@@ -118,12 +125,9 @@ def atomify(md):
     atom += '</feed>\n'
 
     # Write result to file
-    #outname += '.xml' 
     outfile = open('./atoms/' + outname, 'w')
     outfile.write(atom)
     outfile.close()
-    #subprocess.call(['git', 'add', 'atoms/' + outname])
-    #subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
     return outfile.name
 
   
@@ -159,9 +163,7 @@ def render(filename):
                 blog=html_text
             )
         )
-
-    #subprocess.call(['git', 'add', posts_directory + html_name])
-    #subprocess.call(['git','commit','-m','adding {} to vc'.format(html_name)])
+    
     return html_name
 
 
@@ -170,6 +172,9 @@ def on_commit(mds):
     files = []
     for md in mds:
         xml = atomify(md)
+        if(xml in ERROR_OUT):
+            print(md + " failed to be converted to atom in atomify(), " + xml)
+            continue
         html = render(xml)
         files.append(xml)
         files.append(html)
@@ -180,26 +185,15 @@ def on_commit(mds):
     return files
 
 
-def gitatom_git_add(md_file,xml_file,html_file):
-    subprocess.call(['git', 'add', md_file])
-    subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
-    subprocess.call(['git', 'add', 'files/html_files/' + html_file])
-    subprocess.call(['git', 'commit', '-m', 'Adding {}, {}, {} files to git.'.format(md_file, xml_file, html_file)])
-
-
-def gitatom_git_push(filename):
-    print('New files add to vc, push when ready.')
-    #print('Push called with file: {}'.format(filename))
-    #subprocess.call(['git', 'push', 'origin', 'git_hook'])
-
-
 def run(filename):
-    xml_file = atomify(filename)
-    html_file = render(xml_file)
+    files= []
+    files.append(filename)
+    on_commit(files)
+    #xml_file = atomify(filename)
+    #html_file = render(xml_file)
     #published_file = publish(html_file)
     #build.append(published_file)
-    build.build_it()
-    #gitatom_git_add(filename,xml_file,html_file)
+    #build.build_it()
 
 
 def init():
