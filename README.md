@@ -1,5 +1,6 @@
 # GitAtom
  GitAtom blogging software development repository for CS Capstone
+test
 
 ### Install Dependencies
 `pip install -r requirements.txt`
