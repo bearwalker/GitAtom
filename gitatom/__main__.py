@@ -138,6 +138,7 @@ def render(filename):
     title = root.find('entry').find('title').text
     updated = root.find('entry').find('updated').text
     content = root.find('entry').find('content').text
+    content = content.replace('\**', '<').replace('**/', '>')
    
     # load template html file
     template_env = Environment(
@@ -172,6 +173,21 @@ def gitatom_git_add(repo, extension):
     #subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
     #subprocess.call(['git', 'add', 'files/html_files/' + html_file])
     #subprocess.call(['git', 'commit', '-m', 'Adding {}, {}, {} files to git.'.format(md_file, xml_file, html_file)])
+
+
+# function for use with commit git hook
+def on_commit(mds):
+    files = []
+    for md in mds:
+        xml = atomify(md)
+        html = render(xml)
+        files.append(xml)
+        files.append(html)
+    build.build_it()
+    site_dir = Path(config.options['publish_directory'])
+    files.append(str(site_dir) + '/index.html')
+    files.append(str(site_dir) + '/archive.html')
+    return files
 
 
 def gitatom_git_push(filename):
