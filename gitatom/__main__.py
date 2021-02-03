@@ -1,6 +1,6 @@
-import gitatom.build
+from gitatom import build
 import yaml
-import gitatom.config
+from gitatom import config
 import shutil
 import cmarkgfm  # used to convert markdown to html in mdtohtml()
 import subprocess
@@ -124,7 +124,7 @@ def atomify(md):
     outfile.close()
     #subprocess.call(['git', 'add', 'atoms/' + outname])
     #subprocess.call(['git','commit','-m','adding {} to vc'.format(outname)])
-    return outfile.name
+    return outname
 
   
   
@@ -167,14 +167,27 @@ def render(filename):
     return html_name
 
 
-def gitatom_git_add(repo, extension):
+def gitatom_git_add(repo, files):
     index = repo.index
-    index.add(extension)
+    for f in files:
+        index.add(f)
     index.write()
-    #subprocess.call(['git', 'add', md_file])
+    subprocess.call(['git', 'status'])
+    print('end of gitatom_git_add()')
     #subprocess.call(['git', 'add', 'files/xml_files/' + xml_file])
     #subprocess.call(['git', 'add', 'files/html_files/' + html_file])
     #subprocess.call(['git', 'commit', '-m', 'Adding {}, {}, {} files to git.'.format(md_file, xml_file, html_file)])
+
+
+def git_staged_files(repo):
+    status = repo.status()
+    staged_files = []
+    for file_path, flags in status.items():
+        if flags == pygit2.GIT_STATUS_INDEX_NEW or flags == pygit2.GIT_STATUS_INDEX_MODIFIED:
+            file_only = path.basename(file_path)
+            if file_only.endswith('.md') and 'markdowns' in file_path:
+                staged_files.append('./markdowns/' + file_only)
+    return staged_files
 
 
 # function for use with commit git hook
@@ -182,9 +195,9 @@ def on_commit(mds):
     files = []
     for md in mds:
         xml = atomify(md)
-        html = render(xml)
-        files.append(xml)
-        files.append(html)
+        html = render('atoms/' + xml)
+        files.append('atoms/' + xml)
+        files.append('site/posts/' + html)
     build.build_it()
     site_dir = Path(config.options['publish_directory'])
     files.append(str(site_dir) + '/index.html')

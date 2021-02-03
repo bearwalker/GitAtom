@@ -9,7 +9,7 @@
 #
 # output:   publish_directory/index.html
 
-import gitatom.config
+from gitatom import config
 from pathlib import Path
 import cmarkgfm
 from shutil import copyfile
