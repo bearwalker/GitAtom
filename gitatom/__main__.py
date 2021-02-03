@@ -182,18 +182,16 @@ def on_commit(mds):
     site_dir = Path(config.options['publish_directory'])
     files.append(str(site_dir) + '/index.html')
     files.append(str(site_dir) + '/archive.html')
+
     return files
 
 
 def run(filename):
-    files= []
-    files.append(filename)
-    on_commit(files)
-    #xml_file = atomify(filename)
-    #html_file = render(xml_file)
-    #published_file = publish(html_file)
-    #build.append(published_file)
-    #build.build_it()
+    xml_file = atomify(filename)
+    html_file = render(xml_file)
+    published_file = publish(html_file)
+    build.append(published_file)
+    build.build_it()
 
 
 def init():
@@ -242,6 +240,10 @@ if __name__ == '__main__':
                 #subprocess.call(['git', 'add', filename])
                 file_out = atomify(filename)
             elif command == 'render': file_out = render(filename)
+            elif command == 'oc':
+                files= []
+                files.append(filename)
+                on_commit(files)
             elif command == 'run': 
                 #subprocess.call(['git', 'add', filename])
                 file_out = run(filename)
